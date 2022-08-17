@@ -40,9 +40,21 @@ contract EthVolOracle {
         view
         returns (uint256 vol)
     {
-        uint256 squeethPrice = _fetchSqueethTwap(secondsAgo);
-        uint256 ethPrice = _fetchEthTwap(secondsAgo);
+        uint256 impliedFunding = getImpliedFunding(secondsAgo);
+
+        vol = impliedFunding;
+        // vol = impliedFunding.sqrt().mul(365 days);
     }
+
+    function getImpliedFunding(uint32 secondsAgo) public view returns (uint256) {
+        uint256 mark = _fetchSqueethTwap(secondsAgo);
+        uint256 index = _fetchEthTwap(secondsAgo);
+        if (index == 0) return 0;
+
+        // return (mark / index).log() / 17.5;
+        return (mark / index) * 10 / 175;
+    }
+
 
     /**
      * @notice get twap for squeeth
@@ -76,12 +88,8 @@ contract EthVolOracle {
             _period
         );
 
-        if (wethDecimals == quoteDecimals) return quoteAmountOut;
-
-        if (wethDecimals > quoteDecimals)
-            return quoteAmountOut * (10**(wethDecimals - quoteDecimals));
-
-        return quoteAmountOut / (10**(quoteDecimals - wethDecimals));
+        // weth has more decimals than USDC
+        return quoteAmountOut * (10**(wethDecimals - quoteDecimals));
     }
 
     /**
