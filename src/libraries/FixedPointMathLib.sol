@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.7.6;
 
+// solhint-disable func-name-mixedcase
+
 /// @notice Arithmetic library with operations for fixed-point numbers.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/FixedPointMathLib.sol)
 /// @author Inspired by USM (https://github.com/usmfum/USM/blob/master/contracts/WadMath.sol)
@@ -235,7 +237,7 @@ library FixedPointMathLib {
     function ln(uint256 x) internal pure returns (uint256 result) {
         // Do the fixed-point multiplication inline to save gas. This is overflow-safe because the maximum value that log2(x)
         // can return is 195205294292027477728.
-        result = (log2(x) * WAD) / LOG2_E;
+        result = (log_2(x) * WAD) / LOG2_E;
     }
 
     /// @notice Calculates the binary logarithm of x.
@@ -251,7 +253,7 @@ library FixedPointMathLib {
     ///
     /// @param x The unsigned 60.18-decimal fixed-point number for which to calculate the binary logarithm.
     /// @return result The binary logarithm as an unsigned 60.18-decimal fixed-point number.
-    function log2(uint256 x) internal pure returns (uint256 result) {
+    function log_2(uint256 x) internal pure returns (uint256 result) {
         require(x >= WAD, "log input too smll");
 
         // Calculate the integer part of the logarithm and add it to the result and finally calculate y = x * 2^(-n).
