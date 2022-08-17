@@ -22,9 +22,13 @@ forge test
 
 ### Using the contract
 
-The contract is still in development phase and not yet deployed.
+The contract is still in development phase and not yet deployed. But you can already stimulate the real-world result of getting vol with foundry script:
 
-The contract should be easy to call as follow:
+```
+forge script scripts/Deploy.sol --private-key <private key> --fork-url <mainnet rpc> --ffi -vvv
+```
+
+### Contract Interface
 
 ```solidity
 function getEthTwaIV(uint256 secondsAgo) external view returns (uint256 vol);
