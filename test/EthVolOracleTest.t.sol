@@ -3,13 +3,13 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 
-import "src/Contract.sol";
+import "src/EthVolOracle.sol";
 
-contract TestContract is Test {
-    Contract c;
+contract EthVolOracleTest is Test {
+    EthVolOracle oracle;
 
     function setUp() public {
-        c = new Contract();
+        // oracle = new EthVolOracle();
     }
 
     function testBar() public {

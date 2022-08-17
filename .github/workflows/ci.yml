@@ -4,11 +4,25 @@ on:
     branches:
       - master
   pull_request:
+    branches:
+      - master
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v3
+      - name: Install dev dependencies
+        run: npm install
+
+      - name: Run lint check
+        run: npm run lint:check
   run-ci:
     runs-on: ubuntu-latest
     steps:
