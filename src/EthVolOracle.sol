@@ -57,7 +57,7 @@ contract EthVolOracle {
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
         if (ethUsd == 0) return 0;
-        return (squeethEth.divWadDown(ethUsd).ln()) * 10 / 175;
+        return ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
     }
 
     function fetchSqueethTwap(uint32 _period) external view returns (uint256) {
@@ -93,7 +93,11 @@ contract EthVolOracle {
      * @param _period number of seconds in the past to start calculating time-weighted average
      * @return price price scaled with 1e18
      */
-    function _fetchEthTwap(uint32 _period) internal view returns (uint256 price) {
+    function _fetchEthTwap(uint32 _period)
+        internal
+        view
+        returns (uint256 price)
+    {
         price = _fetchRawTwap(
             wethPool,
             weth,
