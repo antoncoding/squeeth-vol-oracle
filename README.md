@@ -3,7 +3,7 @@
 
 <p align='center'>
     <!-- pics go here -->
-    <img src='https://i.imgur.com/Qf6Ga0N.jpg' alt='squeeth' width="280" />
+    <img src='https://i.imgur.com/Qf6Ga0N.jpg' alt='squeeth' width="350" />
 </p> 
 <a href="https://github.com/antoncoding/vol-oracle/actions/workflows/CI.yml"><img src="https://github.com/antoncoding/vol-oracle/workflows/CI/badge.svg"> </a>
 
