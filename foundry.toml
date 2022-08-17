@@ -1,2 +1,2 @@
 [profile.default]
-fuzz-runs = 10_000
+fuzz-runs = 100_000

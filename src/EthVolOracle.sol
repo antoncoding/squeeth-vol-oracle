@@ -41,30 +41,32 @@ contract EthVolOracle {
      * @notice  get the time-weighted vol from squeeth pool
      * @dev     implied vol = ((implied daily funding) * 365) .sqrt
      * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  impliedVol scaled by 1e18. (1e18 = 100%)
      */
     function getEthTwaIV(uint32 secondsAgo)
         external
         view
-        returns (uint256 vol)
+        returns (uint256 impliedVol)
     {
         uint256 impliedFunding = getImpliedFunding(secondsAgo);
-        vol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
+        impliedVol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
     }
 
     /**
      * @notice  get the implied funding
      * @dev     implied funding = ln(mark / index) / funding period
      * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  impliedFunding scaled by 1e18. (1e18 = 100%)
      */
     function getImpliedFunding(uint32 secondsAgo)
         public
         view
-        returns (uint256)
+        returns (uint256 impliedFunding)
     {
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
         if (ethUsd == 0) return 0;
-        return ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
+        impliedFunding = ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
     }
 
     /**
