@@ -1,11 +1,12 @@
 <div align="center">
-  <h1 align="center"> Squeeth Vol Oracle 🥂</h1>
-  <a href="https://github.com/antoncoding/vol-oracle/actions/workflows/CI.yml"><img src="https://github.com/antoncoding/vol-oracle/workflows/CI/badge.svg"> </a>
+  <h1 align="center"> Squeeth Vol Oracle</h1>
 
 <p align='center'>
     <!-- pics go here -->
-    <!-- <img src='' alt='' width="500" /> -->
-</p>  
+    <img src='https://i.imgur.com/Qf6Ga0N.jpg' alt='squeeth' width="280" />
+</p> 
+<a href="https://github.com/antoncoding/vol-oracle/actions/workflows/CI.yml"><img src="https://github.com/antoncoding/vol-oracle/workflows/CI/badge.svg"> </a>
+
 <h6 align="center"> Built with <a href="https://github.com/foundry-rs/forge-template"> foundry template</a>
 
 </div>
@@ -42,6 +43,6 @@ Output:
 ```solidity
 function getEthTwaIV(uint256 secondsAgo) external view returns (uint256 vol);
 
-function getImpliedFunding(uint32 secondsAgo) public view returns (uint256 impliedFunding);
+function getImpliedFunding(uint32 secondsAgo) external view returns (uint256 impliedFunding);
 
 ```
