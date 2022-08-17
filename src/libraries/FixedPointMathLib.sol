@@ -240,6 +240,9 @@ library FixedPointMathLib {
         result = (log_2(x) * WAD) / LOG2_E;
     }
 
+    /// Functions below are copied from PRBMath.sol
+    /// https://github.com/paulrberg/prb-math/blob/main/contracts/PRBMath.sol
+
     /// @notice Calculates the binary logarithm of x.
     ///
     /// @dev Based on the iterative approximation algorithm.
