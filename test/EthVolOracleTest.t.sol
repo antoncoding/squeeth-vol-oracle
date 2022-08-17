@@ -9,7 +9,7 @@ contract EthVolOracleTest is Test {
     EthVolOracle oracle;
 
     function setUp() public {
-        oracle = new EthVolOracle();
+        // oracle = new EthVolOracle();
     }
 
     function testBar() public {
