@@ -12,6 +12,8 @@ import "forge-std/console.sol";
 
 contract EthVolOracle {
     using FixedPointMathLib for uint256;
+
+    /// @dev squeeth controller address
     ISqueethController public immutable squeethController;
 
     address public immutable squeethPool;
@@ -19,11 +21,7 @@ contract EthVolOracle {
 
     address public immutable weth;
     address public immutable squeeth;
-    address public immutable quoteCurrency;
-
-    uint8 public constant wethDecimals = 18;
-    uint8 public constant squeethDecimals = 18;
-    uint8 public constant quoteDecimals = 6;
+    address public immutable usdc;
 
     constructor(address _squeethController) {
         ISqueethController controller = ISqueethController(_squeethController);
@@ -34,52 +32,83 @@ contract EthVolOracle {
 
         weth = controller.weth();
         squeeth = controller.wPowerPerp();
-        quoteCurrency = controller.quoteCurrency();
+        usdc = controller.quoteCurrency();
 
         squeethController = controller;
     }
 
-    /// @dev get the current implied vol by twap price of squeeth & weth
+    /**
+     * @notice  get the time-weighted vol from squeeth pool
+     * @dev     implied vol = ((implied daily funding) * 365) .sqrt
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  impliedVol scaled by 1e18. (1e18 = 100%)
+     */
     function getEthTwaIV(uint32 secondsAgo)
         external
         view
-        returns (uint256 vol)
+        returns (uint256 impliedVol)
     {
         uint256 impliedFunding = getImpliedFunding(secondsAgo);
-        vol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
+        impliedVol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
     }
 
+    /**
+     * @notice  get the implied funding
+     * @dev     implied funding = ln(mark / index) / funding period
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  impliedFunding scaled by 1e18. (1e18 = 100%)
+     */
     function getImpliedFunding(uint32 secondsAgo)
         public
         view
-        returns (uint256)
+        returns (uint256 impliedFunding)
     {
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
         if (ethUsd == 0) return 0;
-        return ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
-    }
-
-    function fetchSqueethTwap(uint32 _period) external view returns (uint256) {
-        return _fetchSqueethTwap(_period);
-    }
-
-    function fetchEthTwap(uint32 _period) external view returns (uint256) {
-        return _fetchEthTwap(_period);
+        impliedFunding = ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
     }
 
     /**
-     * @notice get twap for squeeth / weth
-     * @param _period number of seconds in the past to start calculating time-weighted average
-     * @return twap price scaled with 1e18
+     * @notice  get the twap for squeeth / eth
+     * @dev     squeeth price = (osqueeth pool price) / normFactor * 1e4
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  price scaled by 1e18
      */
-    function _fetchSqueethTwap(uint32 _period) internal view returns (uint256) {
+    function fetchSqueethTwap(uint32 secondsAgo)
+        external
+        view
+        returns (uint256)
+    {
+        return _fetchSqueethTwap(secondsAgo);
+    }
+
+    /**
+     * @notice  get the twap for eth / usdc from uniswap pool directly
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  price scaled by 1e18
+     */
+    function fetchEthTwap(uint32 secondsAgo) external view returns (uint256) {
+        return _fetchEthTwap(secondsAgo);
+    }
+
+    /**
+     * @notice  get the twap for squeeth / eth
+     * @dev     squeeth price = (osqueeth pool price) / normFactor * 1e4
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  price scaled by 1e18
+     */
+    function _fetchSqueethTwap(uint32 secondsAgo)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 wsqueethPrice = _fetchRawTwap(
             squeethPool,
             squeeth,
             weth,
             1e22, // 1e18 * 1e4 (squeeth scale)
-            _period
+            secondsAgo
         );
 
         uint256 normFactor = squeethController.normalizationFactor();
@@ -89,11 +118,11 @@ contract EthVolOracle {
     }
 
     /**
-     * @notice get twap for weth / quote
-     * @param _period number of seconds in the past to start calculating time-weighted average
-     * @return price price scaled with 1e18
+     * @notice  get the twap for eth / usdc from uniswap pool directly
+     * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
+     * @return  price scaled by 1e18
      */
-    function _fetchEthTwap(uint32 _period)
+    function _fetchEthTwap(uint32 secondsAgo)
         internal
         view
         returns (uint256 price)
@@ -101,30 +130,31 @@ contract EthVolOracle {
         price = _fetchRawTwap(
             wethPool,
             weth,
-            quoteCurrency,
+            usdc,
             1e30, // 1e18 + 1e12 (decimals diff)
-            _period
+            secondsAgo
         );
     }
 
     /**
      * @notice get raw twap from the uniswap pool
      * @dev if period is longer than the current timestamp - first timestamp stored in the pool, this will revert with "OLD".
-     * @param _pool uniswap pool address
-     * @param _base base currency. to get eth/usd price, eth is base token
-     * @param _quote quote currency. to get eth/usd price, usd is the quote currency
+     * @param pool uniswap pool address
+     * @param base base currency.
+     * @param quote quote currency.
      * @param secondsAgo number of seconds in the past to start calculating time-weighted average
-     * @return amount of quote currency received for _amountIn of base currency
+     * @param amountIn amount of base currency provided
+     * @return amountOut of quote currency to receive
      */
     function _fetchRawTwap(
-        address _pool,
-        address _base,
-        address _quote,
-        uint128 _scale,
+        address pool,
+        address base,
+        address quote,
+        uint128 amountIn,
         uint32 secondsAgo
     ) internal view returns (uint256) {
         // (arithmeticMeanTick, harmonicMeanLiquidity)
-        (int24 twapTick, ) = OracleLibrary.consult(_pool, secondsAgo);
-        return OracleLibrary.getQuoteAtTick(twapTick, _scale, _base, _quote);
+        (int24 twapTick, ) = OracleLibrary.consult(pool, secondsAgo);
+        return OracleLibrary.getQuoteAtTick(twapTick, amountIn, base, quote);
     }
 }
