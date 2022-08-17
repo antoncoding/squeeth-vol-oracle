@@ -3,10 +3,15 @@ pragma solidity ^0.7.6;
 
 import {ISqueethController} from "./interfaces/ISqueethController.sol";
 import {IUniswapV3Pool} from "./interfaces/IUniswapV3Pool.sol";
-import {OracleLibrary} from "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
 
+import {OracleLibrary} from "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
+import {FixedPointMathLib} from "./libraries/FixedPointMathLib.sol";
+
+import "forge-std/console.sol";
+
 contract EthVolOracle {
+    using FixedPointMathLib for uint256;
     ISqueethController public immutable squeethController;
 
     address public immutable squeethPool;
@@ -41,9 +46,7 @@ contract EthVolOracle {
         returns (uint256 vol)
     {
         uint256 impliedFunding = getImpliedFunding(secondsAgo);
-
-        vol = impliedFunding;
-        // vol = impliedFunding.sqrt().mul(365 days);
+        vol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
     }
 
     function getImpliedFunding(uint32 secondsAgo)
@@ -51,48 +54,53 @@ contract EthVolOracle {
         view
         returns (uint256)
     {
-        uint256 mark = _fetchSqueethTwap(secondsAgo);
-        uint256 index = _fetchEthTwap(secondsAgo);
-        if (index == 0) return 0;
+        uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
+        uint256 ethUsd = _fetchEthTwap(secondsAgo);
+        if (ethUsd == 0) return 0;
+        return (squeethEth.divWadDown(ethUsd).ln()) * 10 / 175;
+    }
 
-        // return (mark / index).log() / 17.5;
-        return ((mark / index) * 10) / 175;
+    function fetchSqueethTwap(uint32 _period) external view returns (uint256) {
+        return _fetchSqueethTwap(_period);
+    }
+
+    function fetchEthTwap(uint32 _period) external view returns (uint256) {
+        return _fetchEthTwap(_period);
     }
 
     /**
-     * @notice get twap for squeeth
+     * @notice get twap for squeeth / weth
      * @param _period number of seconds in the past to start calculating time-weighted average
      * @return twap price scaled with 1e18
      */
     function _fetchSqueethTwap(uint32 _period) internal view returns (uint256) {
-        uint256 quoteAmountOut = _fetchRawTwap(
+        uint256 wsqueethPrice = _fetchRawTwap(
             squeethPool,
             squeeth,
             weth,
-            1e18,
+            1e22, // 1e18 * 1e4 (squeeth scale)
             _period
         );
 
+        uint256 normFactor = squeethController.normalizationFactor();
+
         // return directly becauase squeeth and weth has same decimals
-        return quoteAmountOut;
+        return wsqueethPrice.divWadDown(normFactor);
     }
 
     /**
      * @notice get twap for weth / quote
      * @param _period number of seconds in the past to start calculating time-weighted average
-     * @return twap price scaled with 1e18
+     * @return price price scaled with 1e18
      */
-    function _fetchEthTwap(uint32 _period) internal view returns (uint256) {
-        uint256 quoteAmountOut = _fetchRawTwap(
+    function _fetchEthTwap(uint32 _period) internal view returns (uint256 price) {
+        price = _fetchRawTwap(
             wethPool,
             weth,
             quoteCurrency,
-            1e18,
+            1e30, // 1e18 + 1e12 (decimals diff)
             _period
         );
-
-        // weth has more decimals than USDC
-        return quoteAmountOut * (10**(wethDecimals - quoteDecimals));
     }
 
     /**

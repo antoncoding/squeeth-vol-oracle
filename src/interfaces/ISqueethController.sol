@@ -8,6 +8,7 @@ interface ISqueethController {
     ///@dev squeeth / weth pool
     function wPowerPerpPool() external view returns (address);
 
+    /// 3 currencies
     function weth() external view returns (address);
 
     function quoteCurrency() external view returns (address);
