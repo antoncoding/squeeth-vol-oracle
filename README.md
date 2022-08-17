@@ -24,8 +24,17 @@ forge test
 
 The contract is still in development phase and not yet deployed. But you can already stimulate the real-world result of getting vol with foundry script:
 
+```shell
+forge script scripts/Deploy.sol --private-key <private key> --fork-url <mainnet rpc>
 ```
-forge script scripts/Deploy.sol --private-key <private key> --fork-url <mainnet rpc> --ffi -vvv
+
+Output:
+
+```shell
+== Logs ==
+  implied funding:    2444635075033974
+  implied volatility: 944611985096208966
+
 ```
 
 ### Contract Interface
