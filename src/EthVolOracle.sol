@@ -35,7 +35,11 @@ contract EthVolOracle {
     }
 
     /// @dev get the current implied vol by twap price of squeeth & weth
-    function getEthTwaIV(uint32 secondsAgo) external view returns (uint256 vol) {
+    function getEthTwaIV(uint32 secondsAgo)
+        external
+        view
+        returns (uint256 vol)
+    {
         uint256 squeethPrice = _fetchSqueethTwap(secondsAgo);
         uint256 ethPrice = _fetchEthTwap(secondsAgo);
     }
@@ -46,7 +50,13 @@ contract EthVolOracle {
      * @return twap price scaled with 1e18
      */
     function _fetchSqueethTwap(uint32 _period) internal view returns (uint256) {
-        uint256 quoteAmountOut = _fetchRawTwap(squeethPool, squeeth, weth, 1e18, _period);
+        uint256 quoteAmountOut = _fetchRawTwap(
+            squeethPool,
+            squeeth,
+            weth,
+            1e18,
+            _period
+        );
 
         // return directly becauase squeeth and weth has same decimals
         return quoteAmountOut;
@@ -58,11 +68,18 @@ contract EthVolOracle {
      * @return twap price scaled with 1e18
      */
     function _fetchEthTwap(uint32 _period) internal view returns (uint256) {
-        uint256 quoteAmountOut = _fetchRawTwap(wethPool, weth, quoteCurrency, 1e18, _period);
+        uint256 quoteAmountOut = _fetchRawTwap(
+            wethPool,
+            weth,
+            quoteCurrency,
+            1e18,
+            _period
+        );
 
         if (wethDecimals == quoteDecimals) return quoteAmountOut;
 
-        if (wethDecimals > quoteDecimals) return quoteAmountOut * (10**(wethDecimals - quoteDecimals));
+        if (wethDecimals > quoteDecimals)
+            return quoteAmountOut * (10**(wethDecimals - quoteDecimals));
 
         return quoteAmountOut / (10**(quoteDecimals - wethDecimals));
     }
@@ -86,5 +103,5 @@ contract EthVolOracle {
         // (arithmeticMeanTick, harmonicMeanLiquidity)
         (int24 twapTick, ) = OracleLibrary.consult(_pool, secondsAgo);
         return OracleLibrary.getQuoteAtTick(twapTick, _scale, _base, _quote);
-    }    
+    }
 }
