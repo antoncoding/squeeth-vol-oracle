@@ -5,10 +5,8 @@ import {ISqueethController} from "./interfaces/ISqueethController.sol";
 import {IUniswapV3Pool} from "./interfaces/IUniswapV3Pool.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
 
-import {OracleLibrary} from "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
+import {OracleLibrary} from "./libraries/OracleLibrary.sol";
 import {FixedPointMathLib} from "./libraries/FixedPointMathLib.sol";
-
-import "forge-std/console.sol";
 
 contract EthVolOracle {
     using FixedPointMathLib for uint256;
@@ -22,6 +20,8 @@ contract EthVolOracle {
     address public immutable weth;
     address public immutable squeeth;
     address public immutable usdc;
+
+    uint256 private constant multiplier = uint256((uint256(365) * 1e19) / 175); // 365 / 17.5
 
     constructor(address _squeethController) {
         ISqueethController controller = ISqueethController(_squeethController);
@@ -39,7 +39,7 @@ contract EthVolOracle {
 
     /**
      * @notice  get the time-weighted vol from squeeth pool
-     * @dev     implied vol = ((implied daily funding) * 365) .sqrt
+     * @dev     implied vol = √((implied daily funding) * 365)
      * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
      * @return  impliedVol scaled by 1e18. (1e18 = 100%)
      */
@@ -48,8 +48,13 @@ contract EthVolOracle {
         view
         returns (uint256 impliedVol)
     {
-        uint256 impliedFunding = getImpliedFunding(secondsAgo);
-        impliedVol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
+        uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
+        uint256 ethUsd = _fetchEthTwap(secondsAgo);
+
+        // √ implied funding * 365
+        // = √ (ln(mark / index) / 17.5 * 365)
+        // = √ (ln(mark / index) * 20.85714 )
+        impliedVol = (squeethEth.divWadDown(ethUsd).ln() * multiplier).sqrt(); // * 365 days * 100%
     }
 
     /**
@@ -153,8 +158,10 @@ contract EthVolOracle {
         uint128 amountIn,
         uint32 secondsAgo
     ) internal view returns (uint256) {
-        // (arithmeticMeanTick, harmonicMeanLiquidity)
-        (int24 twapTick, ) = OracleLibrary.consult(pool, secondsAgo);
+        int24 twapTick = OracleLibrary.consultArithmeticMeanTick(
+            pool,
+            secondsAgo
+        );
         return OracleLibrary.getQuoteAtTick(twapTick, amountIn, base, quote);
     }
 }
