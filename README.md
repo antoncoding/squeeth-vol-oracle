@@ -41,16 +41,20 @@ Output:
 
 #### Gas Cost
 
-The gas cost is around 40K ~ 200K, depends on 
+The gas cost is around 46K ~ 140K, depends on:
 
 - `secondsAgo` to calculate twap
 - current state of Uniswap pool, how many records are in the last `secondsAgo` seconds
 
+It costs least (around 46K) while querying the implied vol by the current spot price.
+
 ### Contract Interface
 
 ```solidity
+/// @dev return implied vol with 18 decimals (1e18 = 100%)
 function getEthTwaIV(uint256 secondsAgo) external view returns (uint256 vol);
 
+/// @dev return daily implied funding with 18 decimals (1e18 = 100%)
 function getImpliedFunding(uint32 secondsAgo) external view returns (uint256 impliedFunding);
 
 ```

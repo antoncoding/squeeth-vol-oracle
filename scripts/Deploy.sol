@@ -23,12 +23,12 @@ contract Deploy is Script {
         EthVolOracle oracle = new EthVolOracle(squeethControllerMainnet);
         
         uint256 gasBefore1 = gasleft();
-        uint256 vol = oracle.getEthTwaIV(120);
+        uint256 vol = oracle.getEthTwaIV(7200);
         uint256 gasAfter1 = gasleft();
         console.log("implied volatility:", vol);
         console.log("gas cost:          ", gasBefore1 - gasAfter1);
 
-        uint256 funding = oracle.getImpliedFunding(120);
+        uint256 funding = oracle.getImpliedFunding(1);
         console.log("implied funding:   ", funding);
     }
 }
