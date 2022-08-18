@@ -50,11 +50,10 @@ contract EthVolOracle {
         view
         returns (uint256 impliedVol)
     {
-        
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
 
-        // √ implied funding * 365 
+        // √ implied funding * 365
         // = √ (ln(mark / index) / 17.5 * 365)
         // = √ (ln(mark / index) * 20.85714 )
         impliedVol = (squeethEth.divWadDown(ethUsd).ln() * multiplier).sqrt(); // * 365 days * 100%
