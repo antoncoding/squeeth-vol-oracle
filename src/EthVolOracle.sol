@@ -5,7 +5,7 @@ import {ISqueethController} from "./interfaces/ISqueethController.sol";
 import {IUniswapV3Pool} from "./interfaces/IUniswapV3Pool.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
 
-import {OracleLibrary} from "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
+import {OracleLibrary} from "./libraries/OracleLibrary.sol";
 import {FixedPointMathLib} from "./libraries/FixedPointMathLib.sol";
 
 import "forge-std/console.sol";
@@ -160,8 +160,7 @@ contract EthVolOracle {
         uint128 amountIn,
         uint32 secondsAgo
     ) internal view returns (uint256) {
-        // (arithmeticMeanTick, harmonicMeanLiquidity)
-        (int24 twapTick, ) = OracleLibrary.consult(pool, secondsAgo);
+        int24 twapTick = OracleLibrary.consultArithmeticMeanTick(pool, secondsAgo);
         return OracleLibrary.getQuoteAtTick(twapTick, amountIn, base, quote);
     }
 }
