@@ -23,7 +23,7 @@ forge test
 
 ### Using the contract
 
-The contract is still in development phase and not yet deployed. But you can already stimulate the real-world result of getting vol with foundry script:
+The contract is still in development phase and not yet deployed. But you can already stimulate the gas cost and result of the current mainnet state with foundry script:
 
 ```shell
 forge script scripts/Deploy.sol --private-key <private key> --fork-url <mainnet rpc>
@@ -33,10 +33,18 @@ Output:
 
 ```shell
 == Logs ==
-  implied funding:    2444635075033974
-  implied volatility: 944611985096208966
+  implied volatility (120s): 959347350657613352
+  gas cost:           97612
+  implied funding:    2521499559489813
 
 ```
+
+#### Gas Cost
+
+The gas cost is around 40K ~ 200K, depends on 
+
+- `secondsAgo` to calculate twap
+- current state of Uniswap pool, how many records are in the last `secondsAgo` seconds
 
 ### Contract Interface
 
