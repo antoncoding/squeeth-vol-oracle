@@ -160,7 +160,10 @@ contract EthVolOracle {
         uint128 amountIn,
         uint32 secondsAgo
     ) internal view returns (uint256) {
-        int24 twapTick = OracleLibrary.consultArithmeticMeanTick(pool, secondsAgo);
+        int24 twapTick = OracleLibrary.consultArithmeticMeanTick(
+            pool,
+            secondsAgo
+        );
         return OracleLibrary.getQuoteAtTick(twapTick, amountIn, base, quote);
     }
 }
