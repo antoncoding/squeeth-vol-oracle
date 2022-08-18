@@ -33,7 +33,7 @@ Output:
 
 ```shell
 == Logs ==
-  implied volatility (120s): 959347350657613352
+  implied volatility: 959347350657613352
   gas cost:           97612
   implied funding:    2521499559489813
 
