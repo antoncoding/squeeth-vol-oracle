@@ -8,8 +8,6 @@ import {IERC20} from "./interfaces/IERC20.sol";
 import {OracleLibrary} from "./libraries/OracleLibrary.sol";
 import {FixedPointMathLib} from "./libraries/FixedPointMathLib.sol";
 
-import "forge-std/console.sol";
-
 contract EthVolOracle {
     using FixedPointMathLib for uint256;
 
