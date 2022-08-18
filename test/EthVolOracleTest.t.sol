@@ -68,6 +68,6 @@ contract EthVolOracleTest is Test {
 
     function testGetImpliedVol() public {
         uint256 vol = oracle.getEthTwaIV(600);
-        assertEq(vol, 932144539678846123); // 0.932144539678846123 ~ 93%
+        assertEq(vol, 932144539678846140); // 0.932144539678846140 ~ 93%
     }
 }

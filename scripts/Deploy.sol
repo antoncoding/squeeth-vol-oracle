@@ -22,10 +22,13 @@ contract Deploy is Script {
     function deploy() public {
         EthVolOracle oracle = new EthVolOracle(squeethControllerMainnet);
         
+        uint256 gasBefore1 = gasleft();
         uint256 funding = oracle.getImpliedFunding(600);
+        uint256 gasAfter1 = gasleft();
         console.log("implied funding:   ", funding);
+        console.log("gas cost:          ", gasBefore1 - gasAfter1);
 
-        uint256 vol = oracle.getEthTwaIV(600);
+        uint256 vol = oracle.getEthTwaIV(60);
         console.log("implied volatility:", vol);
     }
 }

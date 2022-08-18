@@ -23,6 +23,8 @@ contract EthVolOracle {
     address public immutable squeeth;
     address public immutable usdc;
 
+    uint256 private constant multiplier = uint256((uint256(365) * 1e19) / 175); // 365 / 17.5
+
     constructor(address _squeethController) {
         ISqueethController controller = ISqueethController(_squeethController);
 
@@ -39,7 +41,7 @@ contract EthVolOracle {
 
     /**
      * @notice  get the time-weighted vol from squeeth pool
-     * @dev     implied vol = ((implied daily funding) * 365) .sqrt
+     * @dev     implied vol = √((implied daily funding) * 365)
      * @param   secondsAgo number of seconds in the past to start calculating time-weighted average
      * @return  impliedVol scaled by 1e18. (1e18 = 100%)
      */
@@ -48,8 +50,14 @@ contract EthVolOracle {
         view
         returns (uint256 impliedVol)
     {
-        uint256 impliedFunding = getImpliedFunding(secondsAgo);
-        impliedVol = (impliedFunding * 365 * 1e18).sqrt(); // * 365 days * 100%
+        
+        uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
+        uint256 ethUsd = _fetchEthTwap(secondsAgo);
+
+        // √ implied funding * 365 
+        // = √ (ln(mark / index) / 17.5 * 365)
+        // = √ (ln(mark / index) * 20.85714 )
+        impliedVol = (squeethEth.divWadDown(ethUsd).ln() * multiplier).sqrt(); // * 365 days * 100%
     }
 
     /**
