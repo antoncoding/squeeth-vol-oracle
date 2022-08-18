@@ -54,7 +54,7 @@ contract EthVolOracle {
         // √ implied funding * 365
         // = √ (ln(mark / index) / 17.5 * 365)
         // = √ (ln(mark / index) * 20.85714 )
-        impliedVol = (squeethEth.divWadDown(ethUsd).ln() * multiplier).sqrt(); // * 365 days * 100%
+        impliedVol = (squeethEth.divWadDown(ethUsd).ln() * multiplier).sqrt();
     }
 
     /**
