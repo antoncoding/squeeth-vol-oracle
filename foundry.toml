@@ -1,2 +1,2 @@
 [profile.default]
-fuzz-runs = 100_000
+optimizer_runs = 1000_000
