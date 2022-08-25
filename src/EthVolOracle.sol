@@ -50,7 +50,7 @@ contract EthVolOracle {
     {
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
-
+        if (ethUsd > squeethEth) return 0;
         // √ implied funding * 365
         // = √ (ln(mark / index) / 17.5 * 365)
         // = √ (ln(mark / index) * 20.85714 )
@@ -70,7 +70,7 @@ contract EthVolOracle {
     {
         uint256 squeethEth = _fetchSqueethTwap(secondsAgo);
         uint256 ethUsd = _fetchEthTwap(secondsAgo);
-        if (ethUsd == 0) return 0;
+        if (ethUsd > squeethEth || ethUsd == 0) return 0;
         impliedFunding = ((squeethEth.divWadDown(ethUsd).ln()) * 10) / 175;
     }
 

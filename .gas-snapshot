@@ -1,4 +1,4 @@
 EthVolOracleTest:testFetchEthTwap() (gas: 19984)
 EthVolOracleTest:testFetchSqueethTwap() (gas: 25495)
-EthVolOracleTest:testGetImpliedVol() (gas: 46685)
-EthVolOracleTest:testImpliedFunding() (gas: 46258)
+EthVolOracleTest:testGetImpliedVol() (gas: 46711)
+EthVolOracleTest:testImpliedFunding() (gas: 46292)
