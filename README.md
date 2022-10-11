@@ -29,14 +29,6 @@ The contract is still in development phase and not yet deployed. But you can alr
 forge script scripts/Deploy.sol --fork-url <mainnet rpc>
 ```
 
-### Deployment
-
-Run the script to deploy your own contract instance on mainnet.
-
-```shell
-forge script scripts/Deploy.sol --fork-url <mainnet rpc> --broadcast --verify -vvvv
-```
-
 Output:
 
 ```shell
@@ -45,6 +37,14 @@ Output:
   gas cost:           97612
   implied funding:    2521499559489813
 
+```
+
+### Deployment
+
+Run the script to deploy your own contract instance on mainnet.
+
+```shell
+forge script scripts/Deploy.sol --fork-url <mainnet rpc> --broadcast --verify -vvvv
 ```
 
 #### Gas Cost
