@@ -26,7 +26,15 @@ forge test
 The contract is still in development phase and not yet deployed. But you can already stimulate the gas cost and result of the current mainnet state with foundry script:
 
 ```shell
-forge script scripts/Deploy.sol --private-key <private key> --fork-url <mainnet rpc>
+forge script scripts/Deploy.sol --fork-url <mainnet rpc>
+```
+
+### Deployment
+
+Run the script to deploy your own contract instance on mainnet.
+
+```shell
+forge script scripts/Deploy.sol --fork-url <mainnet rpc> --broadcast --verify -vvvv
 ```
 
 Output:
