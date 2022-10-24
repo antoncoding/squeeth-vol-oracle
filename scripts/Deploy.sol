@@ -17,6 +17,8 @@ contract Deploy is Script {
         assembly { chainId := chainid() }
         require(chainId == 1 || chainId == 5, "wrong chain");
 
+        console.log("deployer: ", msg.sender);
+
         deploy(chainId);
 
         vm.stopBroadcast();

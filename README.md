@@ -11,7 +11,27 @@
 
 </div>
 
-## Getting Started
+
+## Deployments
+
+The contract is deployed on Goerli and Mainnet:
+
+| Chain | Address | 
+| -------- | -------- |
+| Mainnet    |   [0x5caec004f1378fbfd54a11e9f00e2aad32796b33](https://etherscan.io/address/0x5caec004f1378fbfd54a11e9f00e2aad32796b33#readContract)   |
+| Goerli    |   [0x5caec004f1378fbfd54a11e9f00e2aad32796b33](https://goerli.etherscan.io/address/0x5caec004f1378fbfd54a11e9f00e2aad32796b33#readContract)  |
+
+### Using the contract
+
+You can use cast to directly query the value as follow (mainnet rpc example):
+
+```
+cast call 0x5caec004f1378fbfd54a11e9f00e2aad32796b33  "getEthTwaIV(uint32)(uint256)" 120 --rpc-url https://rpc.ankr.com/eth
+```
+
+## Development
+
+### Getting Started
 
 Compile and run tests
 
@@ -21,9 +41,10 @@ forge build
 forge test
 ```
 
-### Using the contract
 
-The contract is still in development phase and not yet deployed. But you can already stimulate the gas cost and result of the current mainnet state with foundry script:
+### Estimation
+
+You can clone the contract, tune in a bit and use the following script to estimate real world vol value.
 
 ```shell
 forge script scripts/Deploy.sol --fork-url <mainnet rpc>
@@ -37,14 +58,6 @@ Output:
   gas cost:           97612
   implied funding:    2521499559489813
 
-```
-
-### Deployment
-
-Run the script to deploy your own contract instance on mainnet.
-
-```shell
-forge script scripts/Deploy.sol --fork-url <mainnet rpc> --broadcast --verify -vvvv
 ```
 
 #### Gas Cost
